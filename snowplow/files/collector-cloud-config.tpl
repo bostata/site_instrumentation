@@ -60,8 +60,8 @@ write_files:
               }
 
               streams {
-                good = "${var.env}-${var.snowplow_system_tag}-${var.snowplow_collector_good_stream}"
-                bad = "${var.env}-${var.snowplow_system_tag}-${var.snowplow_collector_bad_stream}"
+                good = "${env}-${snowplow_system_tag}-${snowplow_collector_good_stream}"
+                bad = "${env}-${snowplow_system_tag}-${snowplow_collector_bad_stream}"
                 useIpAddressAsPartitionKey = false
                 sink {
                   enabled = kinesis
