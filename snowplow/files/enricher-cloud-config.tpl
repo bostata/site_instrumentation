@@ -14,12 +14,12 @@ write_files:
           enrich {
             streams {
               in {
-                raw = "${snowplow_collector_good_stream}"
+                raw = "${env}-${department}-${snowplow_system_tag}-${snowplow_collector_good_stream}"
               }
               out {
-                enriched = "${snowplow_enricher_good_stream}"
-                bad = "${snowplow_enricher_bad_stream}"
-                pii = "${snowplow_enricher_pii_stream}"
+                enriched = "${env}-${department}-${snowplow_system_tag}-${snowplow_enricher_good_stream}"
+                bad = "${env}-${department}-${snowplow_system_tag}-${snowplow_enricher_bad_stream}"
+                pii = "${env}-${department}-${snowplow_system_tag}-${snowplow_enricher_pii_stream}"
                 partitionKey = event_id
               }
 

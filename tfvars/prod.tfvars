@@ -14,7 +14,7 @@ vpc_basename                                    = "infra"
 # ---------------------------------------------------------
 # Snowplow Infrastructure
 # ---------------------------------------------------------
-snowplow_system_tag                             = "snowplow"
+snowplow_system_tag                             = "sp"
 snowplow_ec2_keypair                            = "snowplow_prod"
 snowplow_ec2_keypair_path                       = "snowplow_prod.pem"
 # Load balancing
@@ -56,7 +56,7 @@ snowplow_collector_bad_stream                   = "collector-bad"
 snowplow_collector_bad_shard_count              = 1
 snowplow_collector_bad_retention_hours          = 24
 # Enricher
-snowplow_enricher_version                       = "0.13.0"
+snowplow_enricher_version                       = "0.19.1"
 snowplow_enricher_buffer_byte_limit             = ""
 snowplow_enricher_buffer_record_limit           = ""
 snowplow_enricher_buffer_time_limit             = 100

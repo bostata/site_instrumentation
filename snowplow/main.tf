@@ -132,7 +132,7 @@ resource aws_alb_listener "alb_listener" {
   }
 }
 
-resource "aws_kinesis_stream" "collector_good" {
+resource aws_kinesis_stream "collector_good" {
   name             = "${var.env}-${var.department}-${var.snowplow_system_tag}-${var.snowplow_collector_good_stream}"
   shard_count      = "${var.snowplow_collector_good_shard_count}"
   retention_period = "${var.snowplow_collector_good_retention_hours}"
@@ -150,7 +150,7 @@ resource "aws_kinesis_stream" "collector_good" {
   }
 }
 
-resource "aws_kinesis_stream" "collector_bad" {
+resource aws_kinesis_stream "collector_bad" {
   name             = "${var.env}-${var.department}-${var.snowplow_system_tag}-${var.snowplow_collector_bad_stream}"
   shard_count      = "${var.snowplow_collector_bad_shard_count}"
   retention_period = "${var.snowplow_collector_bad_retention_hours}"
@@ -176,7 +176,7 @@ resource aws_security_group "instance_http_sg" {
   description = "Access control for instances that listen on http port"
 
   vpc_id = "${var.vpc_id}"
-  name   = "${var.env}-${var.department}-${var.snowplow_system_tag}-h-sg"
+  name   = "${var.env}-${var.department}-${var.snowplow_system_tag}-http"
 
   ingress {
     protocol    = "tcp"
@@ -217,11 +217,12 @@ resource aws_security_group "instance_http_sg" {
   }
 }
 
-data "template_file" "collector_cloud_config" {
+data template_file "collector_cloud_config" {
   template = "${file("${path.module}/files/collector-cloud-config.tpl")}"
 
   vars {
     env                             = "${var.env}"
+    department                      = "${var.department}"
     snowplow_system_tag             = "${var.snowplow_system_tag}"
     snowplow_collector_version      = "${var.snowplow_collector_version}"
     snowplow_collector_ingress_port = "${var.snowplow_collector_ingress_port}"
@@ -236,7 +237,7 @@ data "template_file" "collector_cloud_config" {
   }
 }
 
-resource "aws_instance" "collector" {
+resource aws_instance "collector" {
   ami                         = "${var.snowplow_collector_ami_id}"
   instance_type               = "${var.snowplow_collector_instance_class}"
   count                       = "${var.snowplow_collector_node_count}"
@@ -262,7 +263,7 @@ resource "aws_instance" "collector" {
   }
 }
 
-resource "aws_eip" "collector_eip" {
+resource aws_eip "collector_eip" {
   count    = "${var.snowplow_collector_node_count}"
   instance = "${element(aws_instance.collector.*.id, count.index)}"
 
@@ -285,7 +286,7 @@ resource aws_alb_target_group_attachment "collector_alb_attachment" {
 # Enricher
 # ------------------------------------------------------------------------------
 
-resource "aws_kinesis_stream" "enricher_good" {
+resource aws_kinesis_stream "enricher_good" {
   name             = "${var.env}-${var.department}-${var.snowplow_system_tag}-${var.snowplow_enricher_good_stream}"
   shard_count      = "${var.snowplow_enricher_good_shard_count}"
   retention_period = "${var.snowplow_enricher_good_retention_hours}"
@@ -303,7 +304,7 @@ resource "aws_kinesis_stream" "enricher_good" {
   }
 }
 
-resource "aws_kinesis_stream" "enricher_bad" {
+resource aws_kinesis_stream "enricher_bad" {
   name             = "${var.env}-${var.department}-${var.snowplow_system_tag}-${var.snowplow_enricher_bad_stream}"
   shard_count      = "${var.snowplow_enricher_bad_shard_count}"
   retention_period = "${var.snowplow_enricher_bad_retention_hours}"
@@ -321,7 +322,7 @@ resource "aws_kinesis_stream" "enricher_bad" {
   }
 }
 
-resource "aws_kinesis_stream" "enricher_pii" {
+resource aws_kinesis_stream "enricher_pii" {
   name             = "${var.env}-${var.department}-${var.snowplow_system_tag}-${var.snowplow_enricher_pii_stream}"
   shard_count      = "${var.snowplow_enricher_pii_shard_count}"
   retention_period = "${var.snowplow_enricher_pii_retention_hours}"
@@ -358,10 +359,10 @@ resource aws_dynamodb_table "enricher_checkpoint" {
 }
 
 resource aws_security_group "instance_no_http_sg" {
-  description = "Access control for instances that don't listen on any http port"
+  description = "Access control for instances that do not listen on any http port"
 
   vpc_id = "${var.vpc_id}"
-  name   = "${var.env}-${var.department}-${var.snowplow_system_tag}-nh-sg"
+  name   = "${var.env}-${var.department}-${var.snowplow_system_tag}-no-http"
 
   ingress {
     protocol    = "tcp"
@@ -385,11 +386,12 @@ resource aws_security_group "instance_no_http_sg" {
   }
 }
 
-data "template_file" "enricher_cloud_config" {
+data template_file "enricher_cloud_config" {
   template = "${file("${path.module}/files/enricher-cloud-config.tpl")}"
 
   vars {
     env                                = "${var.env}"
+    department                         = "${var.department}"
     snowplow_system_tag                = "${var.snowplow_system_tag}"
     snowplow_enricher_version          = "${var.snowplow_enricher_version}"
     snowplow_collector_good_stream     = "${var.snowplow_collector_good_stream}"
@@ -406,14 +408,14 @@ data "template_file" "enricher_cloud_config" {
   }
 }
 
-resource "aws_instance" "enricher" {
+resource aws_instance "enricher" {
   ami           = "${var.snowplow_enricher_ami_id}"
   instance_type = "${var.snowplow_enricher_instance_class}"
   count         = "${var.snowplow_enricher_node_count}"
 
-  #subnet_id                   = "${element(var.subnets, count.index)}"
+  subnet_id                   = "${element(var.subnets, count.index)}"
   vpc_security_group_ids      = ["${aws_security_group.instance_no_http_sg.id}"]
-  associate_public_ip_address = false
+  associate_public_ip_address = true
   key_name                    = "${var.snowplow_ec2_keypair}"
   user_data                   = "${data.template_file.enricher_cloud_config.rendered}"
 
