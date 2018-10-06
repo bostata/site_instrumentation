@@ -1,0 +1,3 @@
+*.pem
+*.terraform
+tfvars/secrets.tfvars
