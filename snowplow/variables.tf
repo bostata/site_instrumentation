@@ -1,5 +1,6 @@
 variable "my_ip" {}
 variable "env" {}
+variable "department" {}
 variable "aws_region" {}
 variable "vpc_id" {}
 
@@ -50,6 +51,9 @@ variable "snowplow_enricher_good_retention_hours" {}
 variable "snowplow_enricher_bad_stream" {}
 variable "snowplow_enricher_bad_shard_count" {}
 variable "snowplow_enricher_bad_retention_hours" {}
+variable "snowplow_enricher_pii_stream" {}
+variable "snowplow_enricher_pii_shard_count" {}
+variable "snowplow_enricher_pii_retention_hours" {}
 variable "snowplow_enricher_checkpoint_table" {}
 variable "snowplow_enricher_checkpoint_write_capacity" {}
 variable "snowplow_enricher_checkpoint_read_capacity" {}

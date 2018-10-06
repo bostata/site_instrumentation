@@ -111,12 +111,11 @@ write_files:
             ExecStartPre=/bin/chown -R ${snowplow_service_user}:${snowplow_service_group} ${snowplow_home}
             ExecStartPre=/bin/mkdir /run/snowplow-collector
             ExecStartPre=/bin/chown -R ${snowplow_service_user}:${snowplow_service_group} /run/snowplow-collector
-            ExecStart=java -jar ${snowplow_home}/snowplow-stream-collector-kinesis-${snowplow_collector_version}.jar --config ${snowplow_home}/config.hocon
+            ExecStart=/usr/bin/java -jar ${snowplow_home}/snowplow-stream-collector-kinesis-${snowplow_collector_version}.jar --config ${snowplow_home}/config.hocon
             ExecStop=/bin/kill -s TERM $MAINPID
             ExecStopPost=/bin/rm -rf /run/snowplow-collector
             Restart=always
             RestartSec=5s
-            MemoryMax=2G
 
             [Install]
             WantedBy=multi-user.target
@@ -129,6 +128,10 @@ runcmd:
     - [sh, -c, "wget https://bintray.com/snowplow/snowplow-generic/download_file?file_path=snowplow_scala_stream_collector_kinesis_${snowplow_collector_version}.zip -O snowplow.zip"]
     - [sh, -c, "unzip snowplow.zip"]
     - [sh, -c, "mv snowplow-stream-collector-kinesis-${snowplow_collector_version}.jar ${snowplow_home}/"]
+    - [ systemctl, daemon-reload ]
+    - [ systemctl, enable, prometheus-node-exporter ]
+    - [ systemctl, enable, snowplow-collector.service ]
+    - [ systemctl, start, prometheus-node-exporter ]
 
 
 power_state:

@@ -11,14 +11,19 @@ variable "aws_secret_access_key" {
   description = "admin-level secret access key"
 }
 
-variable "aws_region" {
-  type        = "string"
-  description = "the aws region"
-}
-
 variable "env" {
   type        = "string"
   description = "the env to deploy into"
+}
+
+variable "department" {
+  type        = "string"
+  description = "the department to be tagged"
+}
+
+variable "aws_region" {
+  type        = "string"
+  description = "the aws region"
 }
 
 variable "az_count" {
@@ -258,6 +263,21 @@ variable "snowplow_enricher_bad_shard_count" {
 }
 
 variable "snowplow_enricher_bad_retention_hours" {
+  type        = "string"
+  description = ""
+}
+
+variable "snowplow_enricher_pii_stream" {
+  type        = "string"
+  description = ""
+}
+
+variable "snowplow_enricher_pii_shard_count" {
+  type        = "string"
+  description = ""
+}
+
+variable "snowplow_enricher_pii_retention_hours" {
   type        = "string"
   description = ""
 }

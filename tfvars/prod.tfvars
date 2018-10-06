@@ -2,6 +2,7 @@
 # Generic
 # ---------------------------------------------------------
 env                                             = "prod"
+department                                      = "bostata"
 aws_region                                      = "us-east-1"
 az_count                                        = 2
 # ---------------------------------------------------------
@@ -31,11 +32,11 @@ snowplow_collector_instance_class               = "t2.small"
 snowplow_collector_root_block_size_gigs         = 50
 snowplow_collector_node_count                   = 2
 snowplow_collector_ingress_port                 = 8080
-# Enricher(s)
+# Enricher
 snowplow_enricher_ami_id                        = "ami-059eeca93cf09eebd"
 snowplow_enricher_instance_class                = "t2.small"
 snowplow_enricher_root_block_size_gigs          = 50
-snowplow_enricher_node_count                    = 1
+snowplow_enricher_node_count                    = 1 # LEAVE THIS AT ONE! Bump the instance class instead
 # ---------------------------------------------------------
 # Snowplow Operational
 # ---------------------------------------------------------
@@ -65,6 +66,9 @@ snowplow_enricher_good_retention_hours          = 24
 snowplow_enricher_bad_stream                    = "enricher-bad"
 snowplow_enricher_bad_shard_count               = 1
 snowplow_enricher_bad_retention_hours           = 24
+snowplow_enricher_pii_stream                    = "enricher-pii"
+snowplow_enricher_pii_shard_count               = 1
+snowplow_enricher_pii_retention_hours           = 24
 snowplow_enricher_checkpoint_table              = "enricher-checkpoint"
 snowplow_enricher_checkpoint_write_capacity     = 5
 snowplow_enricher_checkpoint_read_capacity      = 5
