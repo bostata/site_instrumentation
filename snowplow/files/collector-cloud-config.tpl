@@ -11,6 +11,23 @@ packages:
 
 write_files:
     - content: |
+          127.0.0.1 ${env}-${department}-${snowplow_system_tag}-enricher
+          # The following lines are desirable for IPv6 capable hosts
+          ::1 ip6-localhost ip6-loopback
+          fe00::0 ip6-localnet
+          ff00::0 ip6-mcastprefix
+          ff02::1 ip6-allnodes
+          ff02::2 ip6-allrouters
+          ff02::3 ip6-allhosts
+
+      path: "/etc/hosts"
+
+    - content: |
+          ${env}-${department}-${snowplow_system_tag}-enricher
+
+      path: "/etc/hostname"
+
+    - content: |
             collector {
               interface = "0.0.0.0"
               port = ${snowplow_collector_ingress_port}
@@ -78,9 +95,9 @@ write_files:
                 }
 
                 buffer {
-                  byteLimit = 300000
-                  recordLimit = 5
-                  timeLimit = 5000
+                  byteLimit = 100
+                  recordLimit = 1
+                  timeLimit = 1
                 }
               }
             }
@@ -121,13 +138,12 @@ write_files:
             WantedBy=multi-user.target
       path: "/etc/systemd/system/snowplow-collector.service"
 
-
 runcmd:
-    - [sh, -c, "sudo apt-get install default-jre -y"]
-    - [sh, -c, "sudo mkdir ${snowplow_home}"]
-    - [sh, -c, "wget https://bintray.com/snowplow/snowplow-generic/download_file?file_path=snowplow_scala_stream_collector_kinesis_${snowplow_collector_version}.zip -O snowplow.zip"]
-    - [sh, -c, "unzip snowplow.zip"]
-    - [sh, -c, "mv snowplow-stream-collector-kinesis-${snowplow_collector_version}.jar ${snowplow_home}/"]
+    - [ sh, -c, "sudo apt-get install default-jre -y" ]
+    - [ sh, -c, "sudo mkdir ${snowplow_home}" ]
+    - [ sh, -c, "wget https://bintray.com/snowplow/snowplow-generic/download_file?file_path=snowplow_scala_stream_collector_kinesis_${snowplow_collector_version}.zip -O snowplow.zip" ]
+    - [ sh, -c, "unzip snowplow.zip" ]
+    - [ sh, -c, "mv snowplow-stream-collector-kinesis-${snowplow_collector_version}.jar ${snowplow_home}/" ]
     - [ systemctl, daemon-reload ]
     - [ systemctl, enable, prometheus-node-exporter ]
     - [ systemctl, enable, snowplow-collector.service ]

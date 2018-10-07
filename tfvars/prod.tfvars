@@ -3,6 +3,7 @@
 # ---------------------------------------------------------
 env                                             = "prod"
 department                                      = "bostata"
+primary_domain                                  = "bostata.com"
 aws_region                                      = "us-east-1"
 az_count                                        = 2
 # ---------------------------------------------------------
@@ -10,7 +11,6 @@ az_count                                        = 2
 # ---------------------------------------------------------
 vpc_cidr                                        = "10.0.0.0/16"
 vpc_basename                                    = "infra"
-
 # ---------------------------------------------------------
 # Snowplow Infrastructure
 # ---------------------------------------------------------
@@ -30,7 +30,7 @@ snowplow_lb_health_interval                     = 30
 snowplow_collector_ami_id                       = "ami-059eeca93cf09eebd"
 snowplow_collector_instance_class               = "t2.small"
 snowplow_collector_root_block_size_gigs         = 50
-snowplow_collector_node_count                   = 2
+snowplow_collector_node_count                   = 1
 snowplow_collector_ingress_port                 = 8080
 # Enricher
 snowplow_enricher_ami_id                        = "ami-059eeca93cf09eebd"
@@ -73,13 +73,4 @@ snowplow_enricher_checkpoint_table              = "enricher-checkpoint"
 snowplow_enricher_checkpoint_write_capacity     = 5
 snowplow_enricher_checkpoint_read_capacity      = 5
 # Sink
-snowplow_sink_version                           = "0.6.0"
-snowplow_sink_buffer_byte_limit                 = ""
-snowplow_sink_buffer_record_limit               = ""
-snowplow_sink_buffer_time_limit                 = ""
-snowplow_sink_good_s3_bucket                    = ""
-snowplow_sink_bad_stream                        = "sink-bad"
-snowplow_sink_bad_shard_count                   = 1
-snowplow_sink_checkpoint_table                  = "sink-checkpoint"
-snowplow_sink_checkpoint_write_capacity         = 5
-snowplow_sink_checkpoint_read_capacity          = 5
+snowplow_sink_good_s3_bucket                    = "collector-logs"

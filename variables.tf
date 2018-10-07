@@ -21,6 +21,11 @@ variable "department" {
   description = "the department to be tagged"
 }
 
+variable "primary_domain" {
+  type        = "string"
+  description = "the primary domain that will be tracked"
+}
+
 variable "aws_region" {
   type        = "string"
   description = "the aws region"
@@ -297,52 +302,7 @@ variable "snowplow_enricher_checkpoint_read_capacity" {
   description = ""
 }
 
-variable "snowplow_sink_version" {
-  type        = "string"
-  description = ""
-}
-
-variable "snowplow_sink_buffer_byte_limit" {
-  type        = "string"
-  description = ""
-}
-
-variable "snowplow_sink_buffer_record_limit" {
-  type        = "string"
-  description = ""
-}
-
-variable "snowplow_sink_buffer_time_limit" {
-  type        = "string"
-  description = ""
-}
-
 variable "snowplow_sink_good_s3_bucket" {
-  type        = "string"
-  description = ""
-}
-
-variable "snowplow_sink_bad_stream" {
-  type        = "string"
-  description = ""
-}
-
-variable "snowplow_sink_bad_shard_count" {
-  type        = "string"
-  description = ""
-}
-
-variable "snowplow_sink_checkpoint_table" {
-  type        = "string"
-  description = ""
-}
-
-variable "snowplow_sink_checkpoint_write_capacity" {
-  type        = "string"
-  description = ""
-}
-
-variable "snowplow_sink_checkpoint_read_capacity" {
   type        = "string"
   description = ""
 }

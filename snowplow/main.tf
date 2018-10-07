@@ -10,7 +10,7 @@ resource "aws_iam_access_key" "operator_key" {
 }
 
 resource "aws_iam_user_policy" "operator_policy" {
-  name = "${var.env}-${var.department}-${var.snowplow_system_tag}-operator_iam_policy"
+  name = "${var.env}-${var.department}-${var.snowplow_system_tag}-operator-iam-policy"
   user = "${aws_iam_user.operator.name}"
 
   policy = <<EOF
@@ -44,15 +44,18 @@ resource "aws_iam_user_policy" "operator_policy" {
             ],
             "Effect": "Allow",
             "Resource": "*"
+        },
+        {
+            "Action": [
+                "firehose:*"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
         }
     ]
 }
 EOF
 }
-
-# ------------------------------------------------------------------------------
-# S3 Resources Bucket
-# ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 # Load Balancer
@@ -392,6 +395,7 @@ data template_file "enricher_cloud_config" {
   vars {
     env                                = "${var.env}"
     department                         = "${var.department}"
+    primary_domain                     = "${var.primary_domain}"
     snowplow_system_tag                = "${var.snowplow_system_tag}"
     snowplow_enricher_version          = "${var.snowplow_enricher_version}"
     snowplow_collector_good_stream     = "${var.snowplow_collector_good_stream}"
@@ -434,3 +438,63 @@ resource aws_instance "enricher" {
     create_before_destroy = true
   }
 }
+
+resource aws_s3_bucket "delivery_bucket" {
+  bucket = "${var.env}-${var.department}-${var.snowplow_system_tag}-${var.snowplow_sink_good_s3_bucket}"
+  acl    = "private"
+}
+
+# resource "aws_iam_role" "kinesis_role" {
+#   name = "${var.env}-${var.department}-${var.snowplow_system_tag}-operator-role"
+
+
+#   assume_role_policy = <<EOF
+# {
+#   "Version": "2012-10-17",
+#   "Statement": [
+#     {
+#       "Action": "sts:AssumeRole",
+#       "Principal": {
+#         "Service": "firehose.amazonaws.com"
+#       },
+#       "Effect": "Allow"
+#     },
+#     {
+#       "Effect": "Allow",
+#       "Principal": {
+#         "Service": "kinesisanalytics.amazonaws.com"
+#       },
+#       "Action": "sts:AssumeRole"
+#     },
+#     {
+#       "Effect": "Allow",
+#       "Principal": {
+#         "Service": "s3.amazonaws.com"
+#       },
+#       "Action": "sts:AssumeRole"
+#     }
+#   ]
+# }
+# EOF
+# }
+
+
+# resource aws_kinesis_firehose_delivery_stream "delivery_stream" {
+#   name        = "${var.env}-${var.department}-${var.snowplow_system_tag}-delivery"
+#   destination = "extended_s3"
+
+
+#   kinesis_source_configuration {
+#     role_arn           = "${aws_iam_role.kinesis_role.arn}"
+#     kinesis_stream_arn = "${aws_kinesis_stream.enricher_good.arn}"
+#   }
+
+
+#   extended_s3_configuration {
+#     role_arn        = "${aws_iam_role.kinesis_role.arn}"
+#     bucket_arn      = "${aws_s3_bucket.delivery_bucket.arn}"
+#     buffer_size     = 1
+#     buffer_interval = 60
+#   }
+# }
+

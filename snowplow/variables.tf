@@ -1,6 +1,7 @@
 variable "my_ip" {}
 variable "env" {}
 variable "department" {}
+variable "primary_domain" {}
 variable "aws_region" {}
 variable "vpc_id" {}
 
@@ -57,13 +58,4 @@ variable "snowplow_enricher_pii_retention_hours" {}
 variable "snowplow_enricher_checkpoint_table" {}
 variable "snowplow_enricher_checkpoint_write_capacity" {}
 variable "snowplow_enricher_checkpoint_read_capacity" {}
-variable "snowplow_sink_version" {}
-variable "snowplow_sink_buffer_byte_limit" {}
-variable "snowplow_sink_buffer_record_limit" {}
-variable "snowplow_sink_buffer_time_limit" {}
 variable "snowplow_sink_good_s3_bucket" {}
-variable "snowplow_sink_bad_stream" {}
-variable "snowplow_sink_bad_shard_count" {}
-variable "snowplow_sink_checkpoint_table" {}
-variable "snowplow_sink_checkpoint_write_capacity" {}
-variable "snowplow_sink_checkpoint_read_capacity" {}
