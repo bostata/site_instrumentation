@@ -12,8 +12,10 @@ module "vpc" {
 }
 
 module "snowplow" {
-  source                                      = "./snowplow"
-  my_ip                                       = "${data.http.my_ip.body}"
+  source = "./snowplow"
+
+  # my_ip                                       = "${data.http.my_ip.body}"
+  my_ip                                       = "174.192.3.10"
   env                                         = "${var.env}"
   department                                  = "${var.department}"
   primary_domain                              = "${var.primary_domain}"
@@ -69,5 +71,11 @@ module "snowplow" {
   snowplow_enricher_checkpoint_table          = "${var.snowplow_enricher_checkpoint_table}"
   snowplow_enricher_checkpoint_write_capacity = "${var.snowplow_enricher_checkpoint_write_capacity}"
   snowplow_enricher_checkpoint_read_capacity  = "${var.snowplow_enricher_checkpoint_read_capacity}"
-  snowplow_sink_good_s3_bucket                = "${var.snowplow_sink_good_s3_bucket}"
+  snowplow_s3_loader_bucket                   = "${var.snowplow_s3_loader_bucket}"
+  snowplow_s3_loader_version                  = "${var.snowplow_s3_loader_version}"
+  snowplow_s3_loader_bad_stream               = "${var.snowplow_s3_loader_bad_stream}"
+  snowplow_s3_loader_checkpoint_table         = "${var.snowplow_s3_loader_checkpoint_table}"
+  snowplow_s3_loader_buffer_byte_limit        = "${var.snowplow_s3_loader_buffer_byte_limit}"
+  snowplow_s3_loader_buffer_record_limit      = "${var.snowplow_s3_loader_buffer_record_limit}"
+  snowplow_s3_loader_buffer_time_limit        = "${var.snowplow_s3_loader_buffer_time_limit}"
 }

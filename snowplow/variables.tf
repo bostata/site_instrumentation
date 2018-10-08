@@ -58,4 +58,10 @@ variable "snowplow_enricher_pii_retention_hours" {}
 variable "snowplow_enricher_checkpoint_table" {}
 variable "snowplow_enricher_checkpoint_write_capacity" {}
 variable "snowplow_enricher_checkpoint_read_capacity" {}
-variable "snowplow_sink_good_s3_bucket" {}
+variable "snowplow_s3_loader_bucket" {}
+variable "snowplow_s3_loader_version" {}
+variable "snowplow_s3_loader_bad_stream" {}
+variable "snowplow_s3_loader_checkpoint_table" {}
+variable "snowplow_s3_loader_buffer_byte_limit" {}
+variable "snowplow_s3_loader_buffer_record_limit" {}
+variable "snowplow_s3_loader_buffer_time_limit" {}

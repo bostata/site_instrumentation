@@ -302,7 +302,37 @@ variable "snowplow_enricher_checkpoint_read_capacity" {
   description = ""
 }
 
-variable "snowplow_sink_good_s3_bucket" {
+variable "snowplow_s3_loader_bucket" {
+  type        = "string"
+  description = ""
+}
+
+variable "snowplow_s3_loader_version" {
+  type        = "string"
+  description = "the version of the s3 loader"
+}
+
+variable "snowplow_s3_loader_bad_stream" {
+  type        = "string"
+  description = "bad stream name"
+}
+
+variable "snowplow_s3_loader_checkpoint_table" {
+  type        = "string"
+  description = "s3 loader checkpoint table"
+}
+
+variable "snowplow_s3_loader_buffer_byte_limit" {
+  type        = "string"
+  description = ""
+}
+
+variable "snowplow_s3_loader_buffer_record_limit" {
+  type        = "string"
+  description = ""
+}
+
+variable "snowplow_s3_loader_buffer_time_limit" {
   type        = "string"
   description = ""
 }

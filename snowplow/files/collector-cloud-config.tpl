@@ -7,11 +7,12 @@ packages:
     - awscli
     - unzip
     - prometheus-node-exporter
+    - python-pip
 
 
 write_files:
     - content: |
-          127.0.0.1 ${env}-${department}-${snowplow_system_tag}-enricher
+          127.0.0.1 ${env}-${department}-${snowplow_system_tag}-collector
           # The following lines are desirable for IPv6 capable hosts
           ::1 ip6-localhost ip6-loopback
           fe00::0 ip6-localnet
@@ -23,7 +24,7 @@ write_files:
       path: "/etc/hosts"
 
     - content: |
-          ${env}-${department}-${snowplow_system_tag}-enricher
+          ${env}-${department}-${snowplow_system_tag}-collector
 
       path: "/etc/hostname"
 
@@ -95,9 +96,9 @@ write_files:
                 }
 
                 buffer {
-                  byteLimit = 100
-                  recordLimit = 1
-                  timeLimit = 1
+                  byteLimit = ${snowplow_collector_buffer_byte_limit}
+                  recordLimit = ${snowplow_collector_buffer_record_limit}
+                  timeLimit = ${snowplow_collector_buffer_time_limit}
                 }
               }
             }
@@ -139,6 +140,7 @@ write_files:
       path: "/etc/systemd/system/snowplow-collector.service"
 
 runcmd:
+    - [ sh, -c, "sudo pip install --upgrade pip && sudo pip install ipython && sudo pip install snowplow-tracker"]
     - [ sh, -c, "sudo apt-get install default-jre -y" ]
     - [ sh, -c, "sudo mkdir ${snowplow_home}" ]
     - [ sh, -c, "wget https://bintray.com/snowplow/snowplow-generic/download_file?file_path=snowplow_scala_stream_collector_kinesis_${snowplow_collector_version}.zip -O snowplow.zip" ]

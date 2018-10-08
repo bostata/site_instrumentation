@@ -175,7 +175,7 @@ resource aws_kinesis_stream "collector_bad" {
 # Collectors
 # ------------------------------------------------------------------------------
 
-resource aws_security_group "instance_http_sg" {
+resource "aws_security_group" "instance_http_sg" {
   description = "Access control for instances that listen on http port"
 
   vpc_id = "${var.vpc_id}"
@@ -224,19 +224,22 @@ data template_file "collector_cloud_config" {
   template = "${file("${path.module}/files/collector-cloud-config.tpl")}"
 
   vars {
-    env                             = "${var.env}"
-    department                      = "${var.department}"
-    snowplow_system_tag             = "${var.snowplow_system_tag}"
-    snowplow_collector_version      = "${var.snowplow_collector_version}"
-    snowplow_collector_ingress_port = "${var.snowplow_collector_ingress_port}"
-    snowplow_collector_good_stream  = "${var.snowplow_collector_good_stream}"
-    snowplow_collector_bad_stream   = "${var.snowplow_collector_bad_stream}"
-    aws_region                      = "${var.aws_region}"
-    operator_access_key_id          = "${aws_iam_access_key.operator_key.id}"
-    operator_secret_access_key      = "${aws_iam_access_key.operator_key.secret}"
-    snowplow_home                   = "${var.snowplow_home}"
-    snowplow_service_user           = "${var.snowplow_service_user}"
-    snowplow_service_group          = "${var.snowplow_service_group}"
+    env                                    = "${var.env}"
+    department                             = "${var.department}"
+    snowplow_system_tag                    = "${var.snowplow_system_tag}"
+    snowplow_collector_version             = "${var.snowplow_collector_version}"
+    snowplow_collector_ingress_port        = "${var.snowplow_collector_ingress_port}"
+    snowplow_collector_good_stream         = "${var.snowplow_collector_good_stream}"
+    snowplow_collector_bad_stream          = "${var.snowplow_collector_bad_stream}"
+    snowplow_collector_buffer_byte_limit   = "${var.snowplow_collector_buffer_byte_limit}"
+    snowplow_collector_buffer_record_limit = "${var.snowplow_collector_buffer_record_limit}"
+    snowplow_collector_buffer_time_limit   = "${var.snowplow_collector_buffer_time_limit}"
+    aws_region                             = "${var.aws_region}"
+    operator_access_key_id                 = "${aws_iam_access_key.operator_key.id}"
+    operator_secret_access_key             = "${aws_iam_access_key.operator_key.secret}"
+    snowplow_home                          = "${var.snowplow_home}"
+    snowplow_service_user                  = "${var.snowplow_service_user}"
+    snowplow_service_group                 = "${var.snowplow_service_group}"
   }
 }
 
@@ -361,7 +364,7 @@ resource aws_dynamodb_table "enricher_checkpoint" {
   }
 }
 
-resource aws_security_group "instance_no_http_sg" {
+resource "aws_security_group" "instance_no_http_sg" {
   description = "Access control for instances that do not listen on any http port"
 
   vpc_id = "${var.vpc_id}"
@@ -393,22 +396,34 @@ data template_file "enricher_cloud_config" {
   template = "${file("${path.module}/files/enricher-cloud-config.tpl")}"
 
   vars {
-    env                                = "${var.env}"
-    department                         = "${var.department}"
-    primary_domain                     = "${var.primary_domain}"
-    snowplow_system_tag                = "${var.snowplow_system_tag}"
-    snowplow_enricher_version          = "${var.snowplow_enricher_version}"
-    snowplow_collector_good_stream     = "${var.snowplow_collector_good_stream}"
-    snowplow_enricher_good_stream      = "${var.snowplow_enricher_good_stream}"
-    snowplow_enricher_bad_stream       = "${var.snowplow_enricher_bad_stream}"
-    snowplow_enricher_pii_stream       = "${var.snowplow_enricher_pii_stream}"
-    snowplow_enricher_checkpoint_table = "${var.snowplow_enricher_checkpoint_table}"
-    aws_region                         = "${var.aws_region}"
-    operator_access_key_id             = "${aws_iam_access_key.operator_key.id}"
-    operator_secret_access_key         = "${aws_iam_access_key.operator_key.secret}"
-    snowplow_home                      = "${var.snowplow_home}"
-    snowplow_service_user              = "${var.snowplow_service_user}"
-    snowplow_service_group             = "${var.snowplow_service_group}"
+    env                                    = "${var.env}"
+    department                             = "${var.department}"
+    primary_domain                         = "${var.primary_domain}"
+    snowplow_system_tag                    = "${var.snowplow_system_tag}"
+    snowplow_enricher_version              = "${var.snowplow_enricher_version}"
+    snowplow_collector_uri                 = "${aws_alb.alb.dns_name}"
+    snowplow_collector_ingress_port        = "${var.snowplow_collector_ingress_port}"
+    snowplow_collector_good_stream         = "${var.snowplow_collector_good_stream}"
+    snowplow_enricher_good_stream          = "${var.snowplow_enricher_good_stream}"
+    snowplow_enricher_bad_stream           = "${var.snowplow_enricher_bad_stream}"
+    snowplow_enricher_pii_stream           = "${var.snowplow_enricher_pii_stream}"
+    snowplow_enricher_checkpoint_table     = "${var.snowplow_enricher_checkpoint_table}"
+    snowplow_enricher_buffer_byte_limit    = "${var.snowplow_enricher_buffer_byte_limit}"
+    snowplow_enricher_buffer_record_limit  = "${var.snowplow_enricher_buffer_record_limit}"
+    snowplow_enricher_buffer_time_limit    = "${var.snowplow_enricher_buffer_time_limit}"
+    aws_region                             = "${var.aws_region}"
+    operator_access_key_id                 = "${aws_iam_access_key.operator_key.id}"
+    operator_secret_access_key             = "${aws_iam_access_key.operator_key.secret}"
+    snowplow_home                          = "${var.snowplow_home}"
+    snowplow_service_user                  = "${var.snowplow_service_user}"
+    snowplow_service_group                 = "${var.snowplow_service_group}"
+    snowplow_s3_loader_bucket              = "${var.snowplow_s3_loader_bucket}"
+    snowplow_s3_loader_version             = "${var.snowplow_s3_loader_version}"
+    snowplow_s3_loader_bad_stream          = "${var.snowplow_s3_loader_bad_stream}"
+    snowplow_s3_loader_checkpoint_table    = "${var.snowplow_s3_loader_checkpoint_table}"
+    snowplow_s3_loader_buffer_byte_limit   = "${var.snowplow_s3_loader_buffer_byte_limit}"
+    snowplow_s3_loader_buffer_record_limit = "${var.snowplow_s3_loader_buffer_record_limit}"
+    snowplow_s3_loader_buffer_time_limit   = "${var.snowplow_s3_loader_buffer_time_limit}"
   }
 }
 
@@ -440,61 +455,42 @@ resource aws_instance "enricher" {
 }
 
 resource aws_s3_bucket "delivery_bucket" {
-  bucket = "${var.env}-${var.department}-${var.snowplow_system_tag}-${var.snowplow_sink_good_s3_bucket}"
+  bucket = "${var.env}-${var.department}-${var.snowplow_system_tag}-${var.snowplow_s3_loader_bucket}"
   acl    = "private"
 }
 
-# resource "aws_iam_role" "kinesis_role" {
-#   name = "${var.env}-${var.department}-${var.snowplow_system_tag}-operator-role"
+resource aws_kinesis_stream "s3_loader_bad" {
+  name             = "${var.env}-${var.department}-${var.snowplow_system_tag}-${var.snowplow_s3_loader_bad_stream}"
+  shard_count      = "${var.snowplow_collector_good_shard_count}"
+  retention_period = "${var.snowplow_collector_good_retention_hours}"
 
+  shard_level_metrics = [
+    "IncomingBytes",
+    "OutgoingBytes",
+  ]
 
-#   assume_role_policy = <<EOF
-# {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Action": "sts:AssumeRole",
-#       "Principal": {
-#         "Service": "firehose.amazonaws.com"
-#       },
-#       "Effect": "Allow"
-#     },
-#     {
-#       "Effect": "Allow",
-#       "Principal": {
-#         "Service": "kinesisanalytics.amazonaws.com"
-#       },
-#       "Action": "sts:AssumeRole"
-#     },
-#     {
-#       "Effect": "Allow",
-#       "Principal": {
-#         "Service": "s3.amazonaws.com"
-#       },
-#       "Action": "sts:AssumeRole"
-#     }
-#   ]
-# }
-# EOF
-# }
+  tags {
+    Env        = "${var.env}"
+    Department = "${var.department}"
+    System     = "${var.snowplow_system_tag}"
+    Name       = "${var.env}-${var.department}-${var.snowplow_system_tag}-${var.snowplow_s3_loader_bad_stream}"
+  }
+}
 
+resource aws_dynamodb_table "s3_loader_checkpoint" {
+  name           = "${var.env}-${var.department}-${var.snowplow_s3_loader_checkpoint_table}"
+  read_capacity  = "${var.snowplow_enricher_checkpoint_write_capacity}"
+  write_capacity = "${var.snowplow_enricher_checkpoint_read_capacity}"
+  hash_key       = "leaseKey"
 
-# resource aws_kinesis_firehose_delivery_stream "delivery_stream" {
-#   name        = "${var.env}-${var.department}-${var.snowplow_system_tag}-delivery"
-#   destination = "extended_s3"
+  attribute {
+    name = "leaseKey"
+    type = "S"
+  }
 
-
-#   kinesis_source_configuration {
-#     role_arn           = "${aws_iam_role.kinesis_role.arn}"
-#     kinesis_stream_arn = "${aws_kinesis_stream.enricher_good.arn}"
-#   }
-
-
-#   extended_s3_configuration {
-#     role_arn        = "${aws_iam_role.kinesis_role.arn}"
-#     bucket_arn      = "${aws_s3_bucket.delivery_bucket.arn}"
-#     buffer_size     = 1
-#     buffer_interval = 60
-#   }
-# }
-
+  tags {
+    Env        = "${var.env}"
+    Department = "${var.department}"
+    System     = "${var.snowplow_system_tag}"
+  }
+}

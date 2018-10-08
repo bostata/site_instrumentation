@@ -7,6 +7,7 @@ packages:
     - awscli
     - unzip
     - prometheus-node-exporter
+    - python-pip
 
 
 write_files:
@@ -188,23 +189,23 @@ write_files:
               }
 
               buffer {
-                byteLimit = 100
-                recordLimit = 1
-                timeLimit = 1
+                byteLimit = ${snowplow_enricher_buffer_byte_limit}
+                recordLimit = ${snowplow_enricher_buffer_record_limit}
+                timeLimit = ${snowplow_enricher_buffer_time_limit}
               }
-              appName = "${snowplow_enricher_checkpoint_table}"
+              appName = "${env}-${department}-${snowplow_enricher_checkpoint_table}"
             }
-            # monitoring {
-            #   snowplow {
-            #     collectorUri = "{{collectorUri}}"
-            #     collectorPort = 80
-            #     appId = {{enrichAppName}}
-            #     method = GET
-            #   }
-            # }
+            monitoring {
+              snowplow {
+                collectorUri = ${snowplow_collector_uri}
+                collectorPort = ${snowplow_collector_ingress_port}
+                appId = enricher-monitoring
+                method = GET
+              }
+            }
           }
 
-      path: "${snowplow_home}/config.hocon"
+      path: "${snowplow_home}/enricher-config.hocon"
 
     - content: |
             {
@@ -249,7 +250,7 @@ write_files:
           ExecStartPre=/bin/chown -R ${snowplow_service_user}:${snowplow_service_group} ${snowplow_home}
           ExecStartPre=/bin/mkdir /run/snowplow-enricher
           ExecStartPre=/bin/chown -R ${snowplow_service_user}:${snowplow_service_group} /run/snowplow-enricher
-          ExecStart=/usr/bin/java -jar ${snowplow_home}/snowplow-stream-enrich-kinesis-${snowplow_enricher_version}.jar --config ${snowplow_home}/config.hocon --resolver file:${snowplow_home}/resolver.js --enrichments file:${snowplow_home}/
+          ExecStart=/usr/bin/java -jar ${snowplow_home}/snowplow-stream-enrich-kinesis-${snowplow_enricher_version}.jar --config ${snowplow_home}/enricher-config.hocon --resolver file:${snowplow_home}/resolver.js --enrichments file:${snowplow_home}/
           ExecStop=/bin/kill -s TERM $MAINPID
           ExecStopPost=/bin/rm -rf /run/snowplow-enricher
           Restart=always
@@ -259,16 +260,115 @@ write_files:
           WantedBy=multi-user.target
       path: "/etc/systemd/system/snowplow-enricher.service"
 
+    - content: |
+          source = "kinesis"
+          sink = "kinesis"
+
+          aws {
+            accessKey = "${operator_access_key_id}"
+            secretKey = "${operator_secret_access_key}"
+          }
+
+          nsq {
+            channelName = "{{nsqSourceChannelName}}"
+            host = "{{nsqHost}}"
+            port = 1
+            lookupPort = 1
+          }
+
+          kinesis {
+            initialPosition = "TRIM_HORIZON"
+            maxRecords = 10000
+            region = "${aws_region}"
+            appName = "${env}-${department}-${snowplow_s3_loader_checkpoint_table}"
+          }
+
+          streams {
+            inStreamName = "${env}-${department}-${snowplow_system_tag}-${snowplow_enricher_good_stream}"
+            outStreamName = "${env}-${department}-${snowplow_system_tag}-${snowplow_s3_loader_bad_stream}"
+            buffer {
+              byteLimit = ${snowplow_s3_loader_buffer_byte_limit}
+              recordLimit = ${snowplow_s3_loader_buffer_record_limit}
+              timeLimit = ${snowplow_s3_loader_buffer_time_limit}
+            }
+          }
+
+          s3 {
+            region = "${aws_region}"
+            bucket = "${env}-${department}-${snowplow_system_tag}-${snowplow_s3_loader_bucket}"
+            directoryPattern = "enriched/good/{YYYY}/{MM}/{dd}"
+            format = "gzip"
+            maxTimeout = 2000
+          }
+
+          monitoring {
+            snowplow{
+              collectorUri = "${snowplow_collector_uri}"
+              collectorPort = ${snowplow_collector_ingress_port}
+              appId = "s3-loader-monitoring"
+              method = "GET"
+            }
+          }
+      path: "${snowplow_home}/s3-loader-config.hocon"
+
+    - content: |
+          [Unit]
+          Description=Snowplow s3 loader daemon
+          After=network.target
+
+          [Service]
+          PermissionsStartOnly=true
+          User=${snowplow_service_user}
+          Group=${snowplow_service_group}
+          ExecStartPre=/bin/chown -R ${snowplow_service_user}:${snowplow_service_group} ${snowplow_home}
+          ExecStartPre=/bin/mkdir /run/snowplow-s3-loader
+          ExecStartPre=/bin/chown -R ${snowplow_service_user}:${snowplow_service_group} /run/snowplow-s3-loader
+          ExecStart=/usr/bin/java -jar ${snowplow_home}/snowplow-s3-loader-${snowplow_s3_loader_version}-rc1.jar --config ${snowplow_home}/s3-loader-config.hocon
+          ExecStop=/bin/kill -s TERM $MAINPID
+          ExecStopPost=/bin/rm -rf /run/snowplow-s3-loader
+          Restart=always
+          RestartSec=5s
+
+          [Install]
+          WantedBy=multi-user.target
+      path: "/etc/systemd/system/snowplow-s3-loader.service"
+
+    - content: |
+          from snowplow_tracker import Subject, Tracker, Emitter
+          import time
+
+
+          SNOWPLOW_URL = '${snowplow_collector_uri}'
+
+
+          def test_collectors():
+              e = Emitter(SNOWPLOW_URL)
+              t = Tracker(e)
+              t.subject.set_platform("test-plat").set_user_id("test-user").set_lang("en")
+              while True:
+                  t.track_page_view("www.test-host.com", "test-page", "www.test-referrer.com")
+                  time.sleep(0.2)
+
+
+          if __name__ == '__main__':
+              test_collectors()
+      path: "${snowplow_home}/test_collectors.py"
+
 
 runcmd:
-    - [sh, -c, "sudo apt-get install default-jre -y"]
-    - [sh, -c, "sudo mkdir ${snowplow_home}"]
-    - [sh, -c, "wget https://bintray.com/snowplow/snowplow-generic/download_file?file_path=snowplow_stream_enrich_kinesis_${snowplow_enricher_version}.zip -O snowplow.zip"]
-    - [sh, -c, "unzip snowplow.zip"]
-    - [sh, -c, "mv snowplow-stream-enrich-kinesis-${snowplow_enricher_version}.jar ${snowplow_home}/"]
+    - [ sh, -c, "sudo pip install --upgrade pip && sudo pip install ipython && sudo pip install snowplow-tracker"]
+    - [ sh, -c, "sudo apt-get install default-jre -y" ]
+    - [ sh, -c, "sudo mkdir ${snowplow_home}" ]
+    - [ sh, -c, "wget https://bintray.com/snowplow/snowplow-generic/download_file?file_path=snowplow_stream_enrich_kinesis_${snowplow_enricher_version}.zip -O sp-enricher.zip" ]
+    - [ sh, -c, "unzip sp-enricher.zip" ]
+    - [ sh, -c, "mv snowplow-stream-enrich-kinesis-${snowplow_enricher_version}.jar ${snowplow_home}/" ]
+    - [ sh, -c, "wget https://bintray.com/snowplow/snowplow-generic/download_file?file_path=snowplow_s3_loader_${snowplow_s3_loader_version}_rc1.zip -O sp-s3-loader.zip" ]
+    - [ sh, -c, "unzip sp-s3-loader.zip" ]
+    - [sh, -c, "mv snowplow-s3-loader-${snowplow_s3_loader_version}-rc1.jar  ${snowplow_home}/"]
     - [ systemctl, daemon-reload ]
     - [ systemctl, enable, prometheus-node-exporter ]
     - [ systemctl, enable, snowplow-enricher.service ]
+    - [ systemctl, enable, snowplow-s3-loader.service ]
     - [ systemctl, start, prometheus-node-exporter ]
 
 

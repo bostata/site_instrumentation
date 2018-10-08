@@ -46,9 +46,9 @@ snowplow_service_group                          = "ubuntu"
 snowplow_home                                   = "/opt/snowplow"
 # Collector
 snowplow_collector_version                      = "0.14.0"
-snowplow_collector_buffer_byte_limit            = ""
-snowplow_collector_buffer_record_limit          = ""
-snowplow_collector_buffer_time_limit            = ""
+snowplow_collector_buffer_byte_limit            = 1000000
+snowplow_collector_buffer_record_limit          = 1000
+snowplow_collector_buffer_time_limit            = 300
 snowplow_collector_good_stream                  = "collector-good"
 snowplow_collector_good_shard_count             = 1
 snowplow_collector_good_retention_hours         = 24
@@ -57,9 +57,9 @@ snowplow_collector_bad_shard_count              = 1
 snowplow_collector_bad_retention_hours          = 24
 # Enricher
 snowplow_enricher_version                       = "0.19.1"
-snowplow_enricher_buffer_byte_limit             = ""
-snowplow_enricher_buffer_record_limit           = ""
-snowplow_enricher_buffer_time_limit             = 100
+snowplow_enricher_buffer_byte_limit             = 1000000
+snowplow_enricher_buffer_record_limit           = 1000
+snowplow_enricher_buffer_time_limit             = 300
 snowplow_enricher_good_stream                   = "enricher-good"
 snowplow_enricher_good_shard_count              = 1
 snowplow_enricher_good_retention_hours          = 24
@@ -72,5 +72,11 @@ snowplow_enricher_pii_retention_hours           = 24
 snowplow_enricher_checkpoint_table              = "enricher-checkpoint"
 snowplow_enricher_checkpoint_write_capacity     = 5
 snowplow_enricher_checkpoint_read_capacity      = 5
-# Sink
-snowplow_sink_good_s3_bucket                    = "collector-logs"
+# S3 Loader
+snowplow_s3_loader_bucket                       = "collector-logs"
+snowplow_s3_loader_version                      = "0.7.0"
+snowplow_s3_loader_bad_stream                   = "s3-loader-bad"
+snowplow_s3_loader_checkpoint_table             = "s3-loader-checkpoint"
+snowplow_s3_loader_buffer_byte_limit            = 2000000
+snowplow_s3_loader_buffer_record_limit          = 1000
+snowplow_s3_loader_buffer_time_limit            = 600
