@@ -12,10 +12,8 @@ module "vpc" {
 }
 
 module "snowplow" {
-  source = "./snowplow"
-
-  # my_ip                                       = "${data.http.my_ip.body}"
-  my_ip                                       = "174.192.3.10"
+  source                                      = "./snowplow"
+  my_ip                                       = "${data.http.my_ip.body}"
   env                                         = "${var.env}"
   department                                  = "${var.department}"
   primary_domain                              = "${var.primary_domain}"
@@ -78,4 +76,13 @@ module "snowplow" {
   snowplow_s3_loader_buffer_byte_limit        = "${var.snowplow_s3_loader_buffer_byte_limit}"
   snowplow_s3_loader_buffer_record_limit      = "${var.snowplow_s3_loader_buffer_record_limit}"
   snowplow_s3_loader_buffer_time_limit        = "${var.snowplow_s3_loader_buffer_time_limit}"
+}
+
+module "snowplow_light" {
+  source              = "./snowplow_light"
+  env                 = "${var.env}"
+  department          = "${var.department}"
+  primary_domain      = "${var.primary_domain}"
+  aws_region          = "${var.aws_region}"
+  snowplow_system_tag = "${var.snowplow_system_tag}"
 }

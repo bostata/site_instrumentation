@@ -336,3 +336,14 @@ variable "snowplow_s3_loader_buffer_time_limit" {
   type        = "string"
   description = ""
 }
+
+# ---------------------------------------------------------
+# Snowplow Light
+# ---------------------------------------------------------
+
+
+# variable "snowplow_i_bucket" {
+#   type        = "string"
+#   description = ""
+# }
+
