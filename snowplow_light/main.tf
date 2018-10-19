@@ -58,7 +58,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
       query_string = false
 
       cookies {
-        forward = "none"
+        forward = "all"
       }
     }
 
