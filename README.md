@@ -1,4 +1,8 @@
 # site_instrumentation
 
-The code for setting up a dedicated vpc for Snowplow, as well as the entire Snowplow pipeline.
+This sets up the cloudfront-based client side event infra used on the Bostata site. It requires you have `terraform` on your machine.
 
+
+    $ terraform init
+    $ terraform plan
+    $ terraform apply
